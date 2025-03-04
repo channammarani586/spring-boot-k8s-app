@@ -1,15 +1,22 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: spring-boot-k8s-app-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-path: "/"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "3600"
 spec:
   rules:
     - host: k8s.tdlabs.local
       http:
         paths:
           - path: /app
+            pathType: Prefix
             backend:
-              serviceName: spring-boot-k8s-app-svc
-              servicePort: 80
+              service:
+                name: spring-boot-k8s-app-svc
+                port:
+                  number: 80
