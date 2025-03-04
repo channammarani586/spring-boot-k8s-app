@@ -7,24 +7,23 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.7.RELEASE</version>
+        <version>3.2.2</version>
         <relativePath/>
     </parent>
 
     <groupId>com.github.thomasdarimont.training</groupId>
     <artifactId>spring-boot-k8s-app</artifactId>
-    <version>0.0.1.${revision}</version>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-
-        <revision>0-SNAPSHOT</revision>
-
-        <docker-maven-plugin.version>0.30.0</docker-maven-plugin.version>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
     <dependencies>
+        <!-- Spring Boot Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -40,122 +39,51 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
+        <!-- Lombok for reducing boilerplate code -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
 
+        <!-- Spring Boot DevTools for development -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <scope>provided</scope>
+            <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
     </dependencies>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
         <plugins>
+            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build-info</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
+            <!-- Jib Plugin for Docker Image Building -->
             <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.3.1</version>
                 <configuration>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
-
-                    <!-- enables other plugins to use git properties -->
-                    <injectAllReactorProjects>true</injectAllReactorProjects>
-                    <verbose>false</verbose>
+                    <to>
+                        <image>your-dockerhub-username/spring-boot-k8s-app</image>
+                        <tags>
+                            <tag>latest</tag>
+                            <tag>${project.version}</tag>
+                        </tags>
+                    </to>
+                    <container>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
+                    </container>
                 </configuration>
             </plugin>
-
-
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeScope>runtime</includeScope>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>demo.Application</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
-
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>${docker-maven-plugin.version}</version>
-                <configuration>
-                    <verbose>false</verbose>
-                    <images>
-                        <image>
-                            <name>thomasdarimont/demos/${project.artifactId}</name>
-                            <build>
-                                <tags>
-                                    <tag>${project.version}</tag>
-                                    <tag>${git.commit.id}</tag>
-                                </tags>
-                                <dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
-                                <assembly>
-                                    <inline>
-
-                                        <fileSets>
-                                            <fileSet>
-                                                <directory>${project.build.directory}/lib</directory>
-                                                <outputDirectory>lib</outputDirectory>
-                                            </fileSet>
-                                        </fileSets>
-
-                                        <files>
-                                            <file>
-                                                <source>
-                                                    ${project.build.directory}/${project.build.finalName}.${project.packaging}.original
-                                                </source>
-                                            </file>
-                                        </files>
-                                    </inline>
-                                </assembly>
-                            </build>
-                        </image>
-                    </images>
-                </configuration>
-            </plugin>
-
         </plugins>
-
     </build>
 
 </project>
