@@ -3,7 +3,7 @@ kind: ReplicaSet
 metadata:
   name: spring-boot-k8s-app
 spec:
-  replicas: 1
+  replicas: 2  # Ensure at least 2 replicas
   selector:
     matchLabels:
       app: spring-boot-k8s-app
@@ -20,14 +20,11 @@ spec:
           resources:
             requests:
               memory: "256Mi"
-#              cpu: "500m"
             limits:
               memory: "256Mi"
-#              cpu: "500m"
           ports:
             - name: http
               containerPort: 8080
-# https://www.baeldung.com/spring-boot-kubernetes-self-healing-apps
           readinessProbe:
               tcpSocket:
                   port: 8080
