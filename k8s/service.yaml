@@ -8,3 +8,8 @@ spec:
       targetPort: http
   selector:
     app: spring-boot-k8s-app
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours session stickiness
+
